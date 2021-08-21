@@ -1,1 +1,1 @@
-# udg-i7030
+# Operative Systems Seminar
