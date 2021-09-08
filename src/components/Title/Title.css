@@ -1,0 +1,10 @@
+.title {
+    font-size: 2vw;
+    text-align: center;
+}
+
+@media (max-width: 1100px) {
+    .title {
+        font-size: x-large;
+    }
+}
