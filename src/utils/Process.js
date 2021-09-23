@@ -6,8 +6,9 @@ class Process {
     #firstOperand;
     #secondOperand;
     #error;
+    #batchId;
 
-    constructor(id) {
+    constructor(id, batchId) {
         this.#id = id;
         this.#maxTime = Math.floor(Math.random() * 10) + 6;
         this.#executionTime = 0;
@@ -15,6 +16,7 @@ class Process {
         this.#firstOperand = Math.floor(Math.random() * 100);
         this.#secondOperand = Math.floor(Math.random() * 100) + 1;
         this.#error = false;
+        this.#batchId = batchId;
     }
 
     get id() {
@@ -35,6 +37,10 @@ class Process {
 
     get result() {
         return this.#error ? "ERROR" : this.evaluate();
+    }
+
+    get batchId() {
+        return this.#batchId;
     }
 
     throwError() {

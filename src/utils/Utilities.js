@@ -18,12 +18,13 @@ class Utilities {
 
     static generateBatches = (totalProcesses) => {
         console.log("Executing batch initialization...");
-        let batch = [], allBatches = [], remainingProcesses = totalProcesses, id = 0;
+        let batch = [], allBatches = [], remainingProcesses = totalProcesses, id = 0, batchId = 0;
         while (remainingProcesses > 0) {
-            batch.push(new Process(id++));
+            batch.push(new Process(id++, batchId));
 
             if (batch.length === 4) {
                 allBatches.push(batch);
+                ++batchId;
                 batch = [];
             }
 

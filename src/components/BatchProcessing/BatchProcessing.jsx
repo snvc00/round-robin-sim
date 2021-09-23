@@ -25,6 +25,7 @@ const BatchProcessing = ({ totalProcesses, processingDone }) => {
     const [isProcessing, setIsProcessing] = useState(true);
 
     onkeydown = ({ key }) => {
+        key = key.toLowerCase();
         if (Utilities.INTERRUPTIONS?.[key]) {
             switch (key) {
                 case "e":
@@ -112,13 +113,13 @@ const BatchProcessing = ({ totalProcesses, processingDone }) => {
     return (
         <>
             <Container>
-                <div style={{ textAlign: "center"}}>
+                <div style={{ textAlign: "center" }}>
                     <h1>Pending batches: {Math.max(batches.length - (currentBatch + 1), 0)}</h1>
                     <h2>Global Time: {globalTime} seconds</h2>
+                    {
+                        !isProcessing ? <Button onClick={processingDone}>Return</Button> : <></>
+                    }
                 </div>
-                {
-                    !isProcessing ? <Button onClick={processingDone}>Return</Button> : <></>
-                }
                 <br />
                 <Window title="pending processes - Current Batch" icon={<BatWait variant="32x32_4" />}>
                     {
@@ -142,8 +143,8 @@ const BatchProcessing = ({ totalProcesses, processingDone }) => {
                 </Window>
                 <Window title="terminated processes - Current Batch" icon={<Qfecheck111 variant="32x32_4" />}>
                     {
-                        terminatedProcesses.map(process => (
-                            <Fieldset key={process.id} legend={`PID ${process.id}`} className="process-fieldset">
+                        terminatedProcesses?.map(process => (
+                            <Fieldset key={process.id} legend={`PID ${process.id} - Batch ${process.batchId}`} className="process-fieldset">
                                 <p key={process.id + "_p"}>{process.operation} = {process.result}</p>
                             </Fieldset>
                         ))
@@ -152,7 +153,7 @@ const BatchProcessing = ({ totalProcesses, processingDone }) => {
                 <Window title="logs.txt - Notepad" icon={<Notepad variant="32x32_4" />}>
                     <TextArea readOnly value={actionLogs} style={{ width: "100%", height: 200 }} />
                     <br /><br />
-                    <Button onClick={() => { setActionLogs("") }}>Clear</Button>
+                    <Button onClick={() => { setActionLogs("") }}>Clear logs</Button>
                 </Window><br />
             </Container>
             <TaskBar
