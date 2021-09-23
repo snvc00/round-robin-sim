@@ -1,6 +1,6 @@
 {
-  "short_name": "Batch Processing with Multiprogramming",
-  "name": "Batch Processing with Multiprogramming",
+  "short_name": "FCFS Simulation",
+  "name": "First-Come-First-Served simulation",
   "start_url": ".",
   "display": "standalone",
   "theme_color": "#000000",
