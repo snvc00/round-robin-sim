@@ -72,8 +72,13 @@ class Process {
   }
 
   log () {
-    console.log(this)
-    return ` ** PID ${this.id}, ${this.error ? 'ERROR' : 'NORMAL'} **\nArrival Time: ${this.arrivalTime}\nEnd Time: ${this.endTime}\nReturn Time: ${this.endTime - this.arrivalTime}\nResponse Time: ${this.startTime - this.arrivalTime}\nStandby Time: ${(this.endTime - this.startTime) - this.executionTime}\nService Time: ${this.executionTime}\n************`
+    return `** PID ${this.id}, ${this.error ? 'ERROR' : 'NORMAL'} **\n
+            Arrival Time: ${this.arrivalTime}
+            End Time: ${this.endTime}
+            Standby Time: ${(this.endTime - this.arrivalTime) - this.executionTime}
+            Service Time: ${this.executionTime}
+            Return Time: ${this.endTime - this.arrivalTime}
+            Response Time: ${this.startTime - this.arrivalTime}\n************`
   }
 }
 
