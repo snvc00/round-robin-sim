@@ -1,9 +1,15 @@
-import "./Title.css";
+import './Title.css'
+import PropTypes from 'prop-types'
+import React from 'react'
 
 const Title = ({ children }) => {
-    return (
-        <h1 className="title">{children}</h1>
-    );
+  return (
+    <h1 className='title'>{children}</h1>
+  )
 }
 
-export default Title;
+Title.propTypes = {
+  children: PropTypes.string
+}
+
+export default Title
