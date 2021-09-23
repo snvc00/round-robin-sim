@@ -28,6 +28,8 @@ const FirstComeFirstServed = ({ totalProcesses, processingDone }) => {
   const [isProcessing, setIsProcessing] = useState(true)
   const [lastKeyDown, setLastKeyDown] = useState(new Date())
   const [reportLogged, setReportLogged] = useState(false)
+  const [lastUpdate, setLastUpdate] = useState(new Date())
+  const [simulationEnd, setSimulationEnd] = useState(null)
 
   const MAX_PROCESSES_ON_MEMORY = 4
 
@@ -49,10 +51,14 @@ const FirstComeFirstServed = ({ totalProcesses, processingDone }) => {
             processInExecution.block()
             blockedProcesses.push(processInExecution)
             const nextProc = readyProcesses.shift()
-            if (nextProc.startTime === -1) {
-              nextProc.startTime = globalTime
+            if (nextProc instanceof Process) {
+              if (nextProc.startTime === -1) {
+                nextProc.startTime = globalTime
+              }
+              setProcessInExecution(nextProc)
+            } else {
+              setProcessInExecution(null)
             }
-            setProcessInExecution(nextProc)
             operationWasPerformed = true
           }
           break
@@ -119,6 +125,30 @@ const FirstComeFirstServed = ({ totalProcesses, processingDone }) => {
   }
 
   useEffect(() => {
+    const interval = setInterval(() => {
+      setGlobalTime(globalTime => globalTime + 1)
+    }, 1000)
+
+    return () => clearInterval(interval)
+  }, [])
+
+  useEffect(() => {
+    // Avoid updating more than 1 t/s
+    const now = new Date()
+    if ((now - lastUpdate) < 900) {
+      return
+    }
+    setLastUpdate(now)
+
+    // Check if process end
+    if (newProcesses.length === 0 && readyProcesses.length === 0 && blockedProcesses.length === 0 && processInExecution === null) {
+      setIsProcessing(false)
+      if (simulationEnd === null) {
+        setSimulationEnd(globalTime)
+      }
+      return
+    }
+
     if (isProcessing === false && reportLogged === false) {
       let report = `[${new Date().toLocaleTimeString()}, Global Time: ${globalTime} seconds] - All process were terminated, generating report...\n--------------------\n`
       terminatedProcesses.forEach(proc => {
@@ -131,56 +161,58 @@ const FirstComeFirstServed = ({ totalProcesses, processingDone }) => {
       setProcessInExecution(null)
     }
 
-    setTimeout(() => {
-      if (isPaused === false && isProcessing === true) {
-        updateBlockedProcesses()
+    if (isPaused === false && isProcessing === true) {
+      updateBlockedProcesses()
 
-        if (processInExecution instanceof Process) {
-          if (processInExecution.isTerminated()) {
-            // Push to terminated
-            processInExecution.endTime = globalTime
-            terminatedProcesses.push(processInExecution)
+      if (processInExecution instanceof Process) {
+        if (processInExecution.isTerminated()) {
+          // Push to terminated
+          processInExecution.endTime = globalTime - 1
+          terminatedProcesses.push(processInExecution)
 
-            // Add a new process if there is one and define the next process to execute
-            if (newProcesses.length > 0 || readyProcesses.length > 0) {
-              if (newProcesses.length > 0) {
-                const process = newProcesses.shift()
-                if (process.arrivalTime === -1) {
-                  process.arrivalTime = globalTime
-                }
-                readyProcesses.push(process)
-              }
-
-              const nextProc = readyProcesses.shift()
-              if (nextProc.startTime === -1) {
-                nextProc.startTime = globalTime
-              }
-              setProcessInExecution(nextProc)
-            } else {
-              // If all process are terminated, end simulation
-              if (terminatedProcesses.length >= totalProcesses) {
-                setIsProcessing(false)
-                return
-              }
+          // If there is a new process add it to ready
+          if (newProcesses.length > 0) {
+            const readyProc = newProcesses.shift()
+            if (readyProc.arrivalTime === -1) {
+              readyProc.arrivalTime = globalTime
             }
+            readyProcesses.push(readyProc)
+          }
+
+          // Define next process will be executed
+          const nextReadyProc = readyProcesses.shift()
+          if (nextReadyProc instanceof Process) {
+            if (nextReadyProc.startTime === -1) {
+              nextReadyProc.startTime = globalTime
+            }
+            setProcessInExecution(nextReadyProc)
           } else {
-            if (processInExecution.timeToUnblock === 0) {
-              processInExecution.update()
+            // If there are no blocked processes, end processing
+            if (blockedProcesses.length === 0) {
+              setIsProcessing(false)
+              if (simulationEnd === null) {
+                setSimulationEnd(globalTime)
+              }
+            } else {
+              setProcessInExecution(null)
             }
           }
         } else {
-          // If there is no process in execution, check if one is ready
-          if (readyProcesses.length > 0) {
-            const nextProc = readyProcesses.shift()
-            if (nextProc.startTime === -1) {
-              nextProc.startTime = globalTime
-            }
-            setProcessInExecution(nextProc)
+          if (processInExecution.timeToUnblock === 0) {
+            processInExecution.update()
           }
         }
-        setGlobalTime(globalTime + 1)
+      } else {
+        // If there is no process in execution, check if one is ready
+        if (readyProcesses.length > 0) {
+          const nextProc = readyProcesses.shift()
+          if (nextProc.startTime === -1) {
+            nextProc.startTime = globalTime
+          }
+          setProcessInExecution(nextProc)
+        }
       }
-    }, 1000)
+    }
   }, [reportLogged, setGlobalTime, globalTime, setIsPaused, isPaused, isProcessing, processInExecution, terminatedProcesses, newProcesses, readyProcesses, blockedProcesses, setBlockedProcesses, setTerminatedProcesses])
 
   return (
@@ -188,9 +220,15 @@ const FirstComeFirstServed = ({ totalProcesses, processingDone }) => {
       <Container>
         <div style={{ textAlign: 'center' }}>
           <h1>New processes: {newProcesses.length}</h1>
-          <h2>Global Time: {globalTime} seconds</h2>
           {
-            !isProcessing ? <Button onClick={processingDone}>Return</Button> : <></>
+            !isProcessing && simulationEnd !== null
+              ? (
+                <>
+                  <h2>Global Time: {simulationEnd} seconds</h2>
+                  <Button onClick={processingDone}>Return</Button>
+                </>
+                )
+              : (<h2>Global Time: {globalTime} seconds</h2>)
           }
         </div>
         <br />
