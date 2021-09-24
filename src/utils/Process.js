@@ -73,12 +73,13 @@ class Process {
 
   log () {
     return `** PID ${this.id}, ${this.error ? 'ERROR' : 'NORMAL'} **\n
+            Estimated Time: ${this.maxTime}
             Arrival Time: ${this.arrivalTime}
             End Time: ${this.endTime}
             Standby Time: ${(this.endTime - this.arrivalTime) - this.executionTime}
             Service Time: ${this.executionTime}
             Return Time: ${this.endTime - this.arrivalTime}
-            Response Time: ${this.startTime - this.arrivalTime}\n************`
+            Response Time: ${this.startTime - this.arrivalTime}\n\n************`
   }
 }
 
