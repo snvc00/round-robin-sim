@@ -72,11 +72,20 @@ class Process {
   }
 
   partialLog (globalTime) {
+    let standbyTime
+    if (this.endTime !== undefined) {
+      standbyTime = (this.endTime - this.arrivalTime) - this.executionTime
+    } else if (this.arrivalTime !== -1) {
+      standbyTime = globalTime - this.arrivalTime - this.executionTime
+    } else {
+      standbyTime = '-'
+    }
+
     let partialLog = `** PID ${this.id}, ${this.error ? 'ERROR' : 'NORMAL'} **\n`
     partialLog += `\tEstimated Time: ${this.maxTime}\n`
     partialLog += `\tArrival Time: ${this.arrivalTime !== -1 ? this.arrivalTime : '-'}\n`
     partialLog += `\tEnd Time: ${this.endTime ?? '-'}\n`
-    partialLog += `\tStandby Time: ${this.arrivalTime !== -1 ? (globalTime - this.arrivalTime - this.executionTime) : '-'}\n`
+    partialLog += `\tStandby Time: ${standbyTime}\n`
     partialLog += `\tService Time: ${this.arrivalTime !== -1 ? this.executionTime : '-'}\n`
     partialLog += `\tReturn Time: ${this.endTime ? (this.endTime - this.arrivalTime) : '-'}\n`
     partialLog += `\tRemaining Time on CPU: ${this.startTime !== -1 ? (this.maxTime - this.executionTime) : '-'}\n`
