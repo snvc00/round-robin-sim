@@ -1,16 +1,4 @@
 class Process {
-  id
-  maxTime
-  executionTime
-  operator
-  firstOperand
-  secondOperand
-  error
-  arrivalTime
-  startTime
-  endTime
-  timeToUnblock
-
   constructor (id) {
     this.id = id
     this.maxTime = Math.floor(Math.random() * 10) + 6
@@ -22,6 +10,7 @@ class Process {
     this.timeToUnblock = 0
     this.arrivalTime = -1
     this.startTime = -1
+    this.endTime = undefined
   }
 
   get operation () {
@@ -80,6 +69,20 @@ class Process {
             Service Time: ${this.executionTime}
             Return Time: ${this.endTime - this.arrivalTime}
             Response Time: ${this.startTime - this.arrivalTime}\n\n************`
+  }
+
+  partialLog (globalTime) {
+    let partialLog = `** PID ${this.id}, ${this.error ? 'ERROR' : 'NORMAL'} **\n`
+    partialLog += `\tEstimated Time: ${this.maxTime}'\n`
+    partialLog += `\tArrival Time: ${this.arrivalTime !== -1 ? this.arrivalTime : '-'}\n`
+    partialLog += `\tEnd Time: ${this.endTime ?? '-'}\n`
+    partialLog += `\tStandby Time: ${this.arrivalTime !== -1 ? (globalTime - this.arrivalTime - this.executionTime) : '-'}\n`
+    partialLog += `\tService Time: ${this.arrivalTime !== -1 ? this.executionTime : '-'}\n`
+    partialLog += `\tReturn Time: ${this.endTime ? (this.endTime - this.arrivalTime) : '-'}\n`
+    partialLog += `\tRemaining Time on CPU: ${this.startTime !== -1 ? (this.maxTime - this.executionTime) : '-'}\n`
+    partialLog += `\tResponse Time: ${(this.startTime !== -1 && this.arrivalTime !== -1) ? (this.startTime - this.arrivalTime) : '-'}\n`
+
+    return partialLog
   }
 }
 
