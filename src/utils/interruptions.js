@@ -10,5 +10,11 @@ export const INTERRUPTIONS = {
   },
   c: {
     description: 'Continue'
+  },
+  n: {
+    description: 'New process'
+  },
+  b: {
+    description: 'Process table'
   }
 }
