@@ -73,7 +73,7 @@ class Process {
 
   partialLog (globalTime) {
     let partialLog = `** PID ${this.id}, ${this.error ? 'ERROR' : 'NORMAL'} **\n`
-    partialLog += `\tEstimated Time: ${this.maxTime}'\n`
+    partialLog += `\tEstimated Time: ${this.maxTime}\n`
     partialLog += `\tArrival Time: ${this.arrivalTime !== -1 ? this.arrivalTime : '-'}\n`
     partialLog += `\tEnd Time: ${this.endTime ?? '-'}\n`
     partialLog += `\tStandby Time: ${this.arrivalTime !== -1 ? (globalTime - this.arrivalTime - this.executionTime) : '-'}\n`

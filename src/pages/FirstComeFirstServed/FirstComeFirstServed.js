@@ -173,11 +173,13 @@ const FirstComeFirstServed = ({ totalProcesses, processingDone }) => {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setGlobalTime(globalTime => globalTime + 1)
+      if (!isPaused) {
+        setGlobalTime(globalTime => globalTime + 1)
+      }
     }, 1000)
 
     return () => clearInterval(interval)
-  }, [])
+  }, [isPaused])
 
   useEffect(() => {
     // Avoid updating more than 1 t/s
