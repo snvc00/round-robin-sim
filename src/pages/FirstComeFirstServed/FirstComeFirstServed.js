@@ -30,6 +30,7 @@ const FirstComeFirstServed = ({ totalProcesses, processingDone }) => {
   const [reportLogged, setReportLogged] = useState(false)
   const [lastUpdate, setLastUpdate] = useState(new Date())
   const [simulationEnd, setSimulationEnd] = useState(null)
+  const [nextId, setNextId] = useState(totalProcesses)
 
   const MAX_PROCESSES_ON_MEMORY = 4
 
@@ -80,6 +81,30 @@ const FirstComeFirstServed = ({ totalProcesses, processingDone }) => {
             operationWasPerformed = true
           }
           break
+        case 'n':
+          if (isPaused === false) {
+            let processesInMemory = processInExecution instanceof Process ? 1 : 0
+            processesInMemory += readyProcesses.length
+            processesInMemory += blockedProcesses.length
+
+            const newProcess = generateProcesses(1, nextId)[0]
+            setNextId(nextId + 1)
+            if (processesInMemory < 4) {
+              newProcess.arrivalTime = globalTime
+              readyProcesses.push(newProcess)
+            } else {
+              newProcesses.push(newProcess)
+            }
+
+            operationWasPerformed = true
+          }
+          break
+        case 'b':
+          if (isPaused === false) {
+            setIsPaused(true)
+            logPartialProgress()
+          }
+          break
         default:
           console.log(`Not implemented action triggered with ${key}`)
       }
@@ -88,6 +113,28 @@ const FirstComeFirstServed = ({ totalProcesses, processingDone }) => {
         setActionLogs(actionLogs + `[${new Date().toLocaleTimeString()}, Global Time: ${globalTime} seconds] - ${INTERRUPTIONS[key].description}\n`)
       }
     }
+  }
+
+  const logPartialProgress = () => {
+    let log = actionLogs + `[${new Date().toLocaleTimeString()}, Global Time: ${globalTime} seconds] - ${INTERRUPTIONS.b.description}\n`
+
+    newProcesses.forEach((process) => {
+      log += process.partialLog(globalTime) + '\tStatus: New\n************\n'
+    })
+
+    readyProcesses.forEach((process) => {
+      log += process.partialLog(globalTime) + '\tStatus: Ready\n************\n'
+    })
+
+    if (processInExecution instanceof Process) {
+      log += processInExecution.partialLog(globalTime) + '\tStatus: In Execution\n************\n'
+    }
+
+    terminatedProcesses.forEach((process) => {
+      log += process.partialLog(globalTime) + '\tStatus: Terminated\n************\n'
+    })
+
+    setActionLogs(log)
   }
 
   useEffect(() => {
