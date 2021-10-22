@@ -2,7 +2,7 @@
   "name": "udg-i7030",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://snvc00.github.io/first-come-first-served-sim",
+  "homepage": "https://snvc00.github.io/round-robin-sim",
   "dependencies": {
     "@react95/core": "^5.5.0",
     "@react95/icons": "^2.0.4",

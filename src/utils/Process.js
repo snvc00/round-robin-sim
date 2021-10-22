@@ -11,6 +11,7 @@ class Process {
     this.arrivalTime = -1
     this.startTime = -1
     this.endTime = undefined
+    this.quantum = 0
   }
 
   get operation () {
@@ -30,7 +31,12 @@ class Process {
   }
 
   update () {
-    this.timeToUnblock > 0 ? --this.timeToUnblock : ++this.executionTime
+    if (this.timeToUnblock > 0) {
+      --this.timeToUnblock
+    } else {
+      ++this.executionTime
+      ++this.quantum
+    }
   }
 
   isTerminated () {
@@ -54,6 +60,10 @@ class Process {
       default:
         return 'UNDEFINED'
     }
+  }
+
+  resetQuantum () {
+    this.quantum = 0
   }
 
   toString () {

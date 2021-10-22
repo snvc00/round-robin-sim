@@ -4,7 +4,7 @@ import { Button, Input } from '@react95/core'
 import React, { useState } from 'react'
 
 import Title from './components/Title'
-import FirstComeFirstServed from './pages/FirstComeFirstServed'
+import RoundRobin from './pages/RoundRobin'
 
 const Form = styled.form`
   display: flex;
@@ -16,6 +16,7 @@ const Form = styled.form`
 
 function App () {
   const [totalProcesses, setTotalProcesses] = useState(0)
+  const [quantum, setQuantum] = useState(0)
   const [isProcessing, setIsProcessing] = useState(false)
 
   const startProcessing = e => {
@@ -31,7 +32,7 @@ function App () {
     isProcessing === false
       ? (
           <Form onSubmit={startProcessing}>
-            <Title>First Come First Served</Title>
+            <Title>Round Robin</Title>
             <Input
               placeholder='# of processes'
               style={{ marginBottom: 10 }}
@@ -41,10 +42,19 @@ function App () {
               required
             />
             <br />
+            <Input
+              placeholder='Quantum'
+              style={{ marginBottom: 10 }}
+              type='number'
+              min='1'
+              onChange={({ target }) => setQuantum(target.value)}
+              required
+            />
+            <br />
             <Button>Start</Button>
           </Form>
         )
-      : (<FirstComeFirstServed totalProcesses={parseInt(totalProcesses)} processingDone={processingDone} />)
+      : (<RoundRobin totalProcesses={parseInt(totalProcesses)} processingDone={processingDone} quantum={parseInt(quantum)} />)
   )
 }
 

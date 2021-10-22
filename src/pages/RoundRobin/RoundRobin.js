@@ -1,4 +1,4 @@
-import './FirstComeFirstServed.css'
+import './RoundRobin.css'
 import styled from 'styled-components'
 
 import { ProgressBar, Fieldset, TextArea, TaskBar, List, Button } from '@react95/core'
@@ -16,7 +16,7 @@ const Container = styled.div`
   width: 60%;
 `
 
-const FirstComeFirstServed = ({ totalProcesses, processingDone }) => {
+const RoundRobin = ({ totalProcesses, processingDone, quantum }) => {
   const [globalTime, setGlobalTime] = useState(0)
   const [actionLogs, setActionLogs] = useState('')
   const [newProcesses, setNewProcesses] = useState([])
@@ -50,6 +50,7 @@ const FirstComeFirstServed = ({ totalProcesses, processingDone }) => {
         case 'e':
           if (isPaused === false && processInExecution instanceof Process) {
             processInExecution.block()
+            processInExecution.resetQuantum()
             blockedProcesses.push(processInExecution)
             const nextProc = readyProcesses.shift()
             if (nextProc instanceof Process) {
@@ -199,7 +200,7 @@ const FirstComeFirstServed = ({ totalProcesses, processingDone }) => {
     }
 
     if (isProcessing === false && reportLogged === false) {
-      let report = `[${new Date().toLocaleTimeString()}, Global Time: ${globalTime} seconds] - All process were terminated, generating report...\n--------------------\n`
+      let report = `[${new Date().toLocaleTimeString()}, Global Time: ${globalTime} seconds] - All process terminated, generating report...\n--------------------\n`
       terminatedProcesses.forEach(proc => {
         report += proc.log() + '\n'
       })
@@ -247,6 +248,21 @@ const FirstComeFirstServed = ({ totalProcesses, processingDone }) => {
             }
           }
         } else {
+          if (processInExecution.quantum === quantum) {
+            processInExecution.resetQuantum()
+
+            const nextReadyProc = readyProcesses.shift()
+            if (nextReadyProc instanceof Process) {
+              if (nextReadyProc.startTime === -1) {
+                nextReadyProc.startTime = globalTime
+              }
+              readyProcesses.push(processInExecution)
+              setProcessInExecution(nextReadyProc)
+            }
+
+            return
+          }
+
           if (processInExecution.timeToUnblock === 0) {
             processInExecution.update()
           }
@@ -269,6 +285,7 @@ const FirstComeFirstServed = ({ totalProcesses, processingDone }) => {
       <Container>
         <div style={{ textAlign: 'center' }}>
           <h1>New processes: {newProcesses.length}</h1>
+          <h2>Quantum: {quantum}</h2>
           {
             !isProcessing && simulationEnd !== null
               ? (
@@ -299,6 +316,7 @@ const FirstComeFirstServed = ({ totalProcesses, processingDone }) => {
                   <p>Estimated execution time: {processInExecution.maxTime} seconds</p>
                   <p>Ellapsed time: {processInExecution.executionTime} seconds</p>
                   <p>Missing time: {processInExecution.maxTime - processInExecution.executionTime} seconds</p>
+                  <p>Quantum: {processInExecution.quantum}</p>
                   <ProgressBar width={200} percent={Math.round(processInExecution.executionTime / processInExecution.maxTime * 100)} />
                 </Fieldset>
                 )
@@ -353,9 +371,10 @@ const FirstComeFirstServed = ({ totalProcesses, processingDone }) => {
   )
 }
 
-FirstComeFirstServed.propTypes = {
+RoundRobin.propTypes = {
   totalProcesses: PropTypes.number,
-  processingDone: PropTypes.func
+  processingDone: PropTypes.func,
+  quantum: PropTypes.number
 }
 
-export default FirstComeFirstServed
+export default RoundRobin
