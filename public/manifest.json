@@ -1,6 +1,6 @@
 {
-  "short_name": "FCFS Simulation",
-  "name": "First-Come-First-Served simulation",
+  "short_name": "RR Simulation",
+  "name": "Round Robin Simulation",
   "start_url": ".",
   "display": "standalone",
   "theme_color": "#000000",
