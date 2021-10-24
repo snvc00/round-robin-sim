@@ -1,0 +1,31 @@
+{
+  "files": {
+    "main.css": "/round-robin-sim/static/css/main.96f851f6.chunk.css",
+    "main.js": "/round-robin-sim/static/js/main.3832af16.chunk.js",
+    "main.js.map": "/round-robin-sim/static/js/main.3832af16.chunk.js.map",
+    "runtime-main.js": "/round-robin-sim/static/js/runtime-main.22fca77b.js",
+    "runtime-main.js.map": "/round-robin-sim/static/js/runtime-main.22fca77b.js.map",
+    "static/js/2.9b7e9c5f.chunk.js": "/round-robin-sim/static/js/2.9b7e9c5f.chunk.js",
+    "static/js/2.9b7e9c5f.chunk.js.map": "/round-robin-sim/static/js/2.9b7e9c5f.chunk.js.map",
+    "index.html": "/round-robin-sim/index.html",
+    "static/css/main.96f851f6.chunk.css.map": "/round-robin-sim/static/css/main.96f851f6.chunk.css.map",
+    "static/js/2.9b7e9c5f.chunk.js.LICENSE.txt": "/round-robin-sim/static/js/2.9b7e9c5f.chunk.js.LICENSE.txt",
+    "static/media/MS-Sans-Serif.30dfad5d.eot": "/round-robin-sim/static/media/MS-Sans-Serif.30dfad5d.eot",
+    "static/media/MS-Sans-Serif.4fb9ed0f.woff2": "/round-robin-sim/static/media/MS-Sans-Serif.4fb9ed0f.woff2",
+    "static/media/MS-Sans-Serif.82eeac7b.woff": "/round-robin-sim/static/media/MS-Sans-Serif.82eeac7b.woff",
+    "static/media/MS-Sans-Serif.93905f8d.ttf": "/round-robin-sim/static/media/MS-Sans-Serif.93905f8d.ttf",
+    "static/media/React95Video-Numbers.1b0c9ed8.woff2": "/round-robin-sim/static/media/React95Video-Numbers.1b0c9ed8.woff2",
+    "static/media/React95Video-Numbers.70eb4c83.eot": "/round-robin-sim/static/media/React95Video-Numbers.70eb4c83.eot",
+    "static/media/React95Video-Numbers.abf01d42.ttf": "/round-robin-sim/static/media/React95Video-Numbers.abf01d42.ttf",
+    "static/media/React95Video-Numbers.cc52603d.woff": "/round-robin-sim/static/media/React95Video-Numbers.cc52603d.woff",
+    "static/media/check-disabled.svg": "/round-robin-sim/static/media/check-disabled.6c74515b.svg",
+    "static/media/check.svg": "/round-robin-sim/static/media/check.cab94f08.svg",
+    "static/media/rightcaret.4316e9ff.svg": "/round-robin-sim/static/media/rightcaret.4316e9ff.svg"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.22fca77b.js",
+    "static/js/2.9b7e9c5f.chunk.js",
+    "static/css/main.96f851f6.chunk.css",
+    "static/js/main.3832af16.chunk.js"
+  ]
+}
