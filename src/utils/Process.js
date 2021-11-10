@@ -12,6 +12,8 @@ class Process {
     this.startTime = -1
     this.endTime = undefined
     this.quantum = 0
+    this.size = Math.floor(Math.random() * (26 - 6) + 6)
+    this.memoryAddress = null
   }
 
   get operation () {
