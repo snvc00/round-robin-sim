@@ -20,7 +20,7 @@ const Container = styled.div`
 const RoundRobin = ({ totalProcesses, processingDone, quantum }) => {
   const [globalTime, setGlobalTime] = useState(0)
   const [actionLogs, setActionLogs] = useState('')
-  const [memory] = useState(new Memory())
+  const [memory, setMemory] = useState(new Memory())
   const [newProcesses, setNewProcesses] = useState([])
   const [readyProcesses, setReadyProcesses] = useState([])
   const [processInExecution, setProcessInExecution] = useState()
@@ -259,6 +259,7 @@ const RoundRobin = ({ totalProcesses, processingDone, quantum }) => {
       if (simulationEnd === null) {
         setSimulationEnd(globalTime)
       }
+      setMemory(new Memory())
       return
     }
 
