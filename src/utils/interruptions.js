@@ -16,5 +16,8 @@ export const INTERRUPTIONS = {
   },
   b: {
     description: 'Process table'
+  },
+  t: {
+    description: 'Memory visualization'
   }
 }

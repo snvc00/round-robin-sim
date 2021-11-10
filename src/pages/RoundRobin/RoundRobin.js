@@ -2,12 +2,13 @@ import './RoundRobin.css'
 import styled from 'styled-components'
 
 import { ProgressBar, Fieldset, TextArea, TaskBar, List, Button } from '@react95/core'
-import { Notepad, BatWait, BatExec2, Qfecheck111, RecycleEmpty, User2 } from '@react95/icons'
+import { Notepad, BatWait, BatExec2, Qfecheck111, RecycleEmpty, User2, Memory as MemoryIcon } from '@react95/icons'
 import React, { useEffect, useState } from 'react'
 import PropTypes from 'prop-types'
 
 import Window from '../../components/Window'
 import { INTERRUPTIONS, generateProcesses, Process } from '../../utils'
+import Memory from '../../utils/Memory'
 
 const Container = styled.div`
   margin: auto;
@@ -19,6 +20,7 @@ const Container = styled.div`
 const RoundRobin = ({ totalProcesses, processingDone, quantum }) => {
   const [globalTime, setGlobalTime] = useState(0)
   const [actionLogs, setActionLogs] = useState('')
+  const [memory] = useState(new Memory())
   const [newProcesses, setNewProcesses] = useState([])
   const [readyProcesses, setReadyProcesses] = useState([])
   const [processInExecution, setProcessInExecution] = useState()
@@ -31,8 +33,6 @@ const RoundRobin = ({ totalProcesses, processingDone, quantum }) => {
   const [lastUpdate, setLastUpdate] = useState(new Date())
   const [simulationEnd, setSimulationEnd] = useState(null)
   const [nextId, setNextId] = useState(totalProcesses)
-
-  const MAX_PROCESSES_ON_MEMORY = 4
 
   onkeydown = ({ key }) => {
     key = key.toLowerCase()
@@ -71,6 +71,7 @@ const RoundRobin = ({ totalProcesses, processingDone, quantum }) => {
           }
           break
         case 'p':
+        case 't':
           if (isPaused === false) {
             setIsPaused(true)
             operationWasPerformed = true
@@ -84,17 +85,15 @@ const RoundRobin = ({ totalProcesses, processingDone, quantum }) => {
           break
         case 'n':
           if (isPaused === false) {
-            let processesInMemory = processInExecution instanceof Process ? 1 : 0
-            processesInMemory += readyProcesses.length
-            processesInMemory += blockedProcesses.length
-
             const newProcess = generateProcesses(1, nextId)[0]
             setNextId(nextId + 1)
-            if (processesInMemory < 4) {
+
+            const wasAllocated = memory.alloc(newProcess)
+            if (!wasAllocated) {
+              newProcesses.push(newProcess)
+            } else {
               newProcess.arrivalTime = globalTime
               readyProcesses.push(newProcess)
-            } else {
-              newProcesses.push(newProcess)
             }
 
             operationWasPerformed = true
@@ -138,6 +137,62 @@ const RoundRobin = ({ totalProcesses, processingDone, quantum }) => {
     setActionLogs(log)
   }
 
+  const getMemoryColor = (allocatedBy) => {
+    if (allocatedBy === null) {
+      return 'transparent'
+    }
+
+    if (allocatedBy === 'OS') {
+      return 'black'
+    }
+
+    if (processInExecution instanceof Process && allocatedBy === processInExecution.id) {
+      return 'red'
+    }
+
+    for (let i = 0; i < readyProcesses.length; i++) {
+      if (allocatedBy === readyProcesses[i].id) {
+        return 'blue'
+      }
+    }
+
+    for (let i = 0; i < blockedProcesses.length; i++) {
+      if (allocatedBy === blockedProcesses[i].id) {
+        return 'purple'
+      }
+    }
+  }
+
+  const renderMemoryVisualization = () => {
+    const memoryStatus = memory.getCopy()
+    memoryStatus.forEach((frame) => {
+      frame.color = getMemoryColor(frame.allocatedBy)
+    })
+
+    return (
+      <Window title='main.memory - Memory' icon={<MemoryIcon variant='32x32_4' />}>
+        <table>
+          <thead>
+            <tr>
+              <th># Frame</th>
+              <th>Memory</th>
+            </tr>
+          </thead>
+          <tbody>
+            {
+              memoryStatus.map((frame, index) => (
+                <tr key={index}>
+                  <td align='center'>{index}</td>
+                  <td style={{ color: frame.color }}>{frame.allocatedBy ?? ''} {'▮'.repeat(5 - frame.freeSpace)}</td>
+                </tr>
+              ))
+            }
+          </tbody>
+        </table>
+      </Window>
+    )
+  }
+
   useEffect(() => {
     const newProcs = generateProcesses(totalProcesses)
     const readyProcs = []
@@ -145,16 +200,24 @@ const RoundRobin = ({ totalProcesses, processingDone, quantum }) => {
     const procToExecute = newProcs.shift()
     procToExecute.arrivalTime = 0
     procToExecute.startTime = 0
+    memory.alloc(procToExecute)
 
-    const totalReadyProcesses = Math.min(newProcs.length, MAX_PROCESSES_ON_MEMORY - 1)
-    for (let i = 0; i < totalReadyProcesses; ++i) {
-      const process = newProcs.shift()
-      process.arrivalTime = 0
-      readyProcs.push(process)
+    while (newProcs.length > 0) {
+      const nextProccess = newProcs.shift()
+      const wasAllocated = memory.alloc(nextProccess)
+
+      if (!wasAllocated) {
+        newProcs.unshift(nextProccess)
+        break
+      }
+
+      nextProccess.arrivalTime = 0
+      readyProcs.push(nextProccess)
     }
+
     setNewProcesses(newProcs)
-    setReadyProcesses(readyProcs)
     setProcessInExecution(procToExecute)
+    setReadyProcesses(readyProcs)
   }, [totalProcesses])
 
   const updateBlockedProcesses = () => {
@@ -218,15 +281,22 @@ const RoundRobin = ({ totalProcesses, processingDone, quantum }) => {
         if (processInExecution.isTerminated()) {
           // Push to terminated
           processInExecution.endTime = globalTime - 1
+          memory.dealloc(processInExecution)
           terminatedProcesses.push(processInExecution)
 
           // If there is a new process add it to ready
           if (newProcesses.length > 0) {
             const readyProc = newProcesses.shift()
-            if (readyProc.arrivalTime === -1) {
-              readyProc.arrivalTime = globalTime
+            const wasAllocated = memory.alloc(readyProc)
+
+            if (!wasAllocated) {
+              newProcesses.unshift(readyProc)
+            } else {
+              if (readyProc.arrivalTime === -1) {
+                readyProc.arrivalTime = globalTime
+              }
+              readyProcesses.push(readyProc)
             }
-            readyProcesses.push(readyProc)
           }
 
           // Define next process will be executed
@@ -302,7 +372,7 @@ const RoundRobin = ({ totalProcesses, processingDone, quantum }) => {
           {
             readyProcesses.map((process, index) => (
               <Fieldset key={index} legend={`PID ${process.id}`} style={{ width: '90%', textAlign: 'left', marginBottom: 10 }}>
-                <p key={index + '_p'}>Estimated execution time: {process.maxTime} seconds - Ellapsed time: {process.executionTime} seconds</p>
+                <p key={index + '_p'}>Estimated execution time: {process.maxTime} seconds - Ellapsed time: {process.executionTime} seconds - Size: {process.size}MB</p>
               </Fieldset>)
             )
           }
@@ -317,6 +387,7 @@ const RoundRobin = ({ totalProcesses, processingDone, quantum }) => {
                   <p>Ellapsed time: {processInExecution.executionTime} seconds</p>
                   <p>Missing time: {processInExecution.maxTime - processInExecution.executionTime} seconds</p>
                   <p>Quantum: {processInExecution.quantum}</p>
+                  <p>Size: {processInExecution.size}MB</p>
                   <ProgressBar width={200} percent={Math.round(processInExecution.executionTime / processInExecution.maxTime * 100)} />
                 </Fieldset>
                 )
@@ -349,7 +420,9 @@ const RoundRobin = ({ totalProcesses, processingDone, quantum }) => {
           <TextArea readOnly value={actionLogs} style={{ width: '100%', height: 200 }} />
           <br /><br />
           <Button onClick={() => { setActionLogs('') }}>Clear logs</Button>
-        </Window><br />
+        </Window>
+        {renderMemoryVisualization()}
+        <br />
       </Container>
       <TaskBar
         list={
