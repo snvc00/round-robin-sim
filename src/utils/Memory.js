@@ -50,12 +50,12 @@ class Memory {
       return false
     }
 
-    const allocatedFrames = Math.ceil(process.size / 5)
-    for (let offset = 0; offset < allocatedFrames; offset++) {
-      this.memory[process.memoryAddress + offset].allocatedBy = null
-      this.memory[process.memoryAddress + offset].freeSpace = 5
-    }
-    process.memoryAddress = null
+    this.memory.forEach((frame) => {
+      if (frame.allocatedBy === process.id) {
+        frame.allocatedBy = null
+        frame.freeSpace = 5
+      }
+    })
 
     return true
   }

@@ -2,7 +2,7 @@ import './RoundRobin.css'
 import styled from 'styled-components'
 
 import { ProgressBar, Fieldset, TextArea, TaskBar, List, Button } from '@react95/core'
-import { Notepad, BatWait, BatExec2, Qfecheck111, RecycleEmpty, User2, Memory as MemoryIcon } from '@react95/icons'
+import { Notepad, BatWait, BatExec2, Qfecheck111, RecycleEmpty, User2, Memory as MemoryIcon, ReaderCd2 } from '@react95/icons'
 import React, { useEffect, useState } from 'react'
 import PropTypes from 'prop-types'
 
@@ -25,6 +25,7 @@ const RoundRobin = ({ totalProcesses, processingDone, quantum }) => {
   const [readyProcesses, setReadyProcesses] = useState([])
   const [processInExecution, setProcessInExecution] = useState()
   const [blockedProcesses, setBlockedProcesses] = useState([])
+  const [suspendedProcesses] = useState([])
   const [terminatedProcesses, setTerminatedProcesses] = useState([])
   const [isPaused, setIsPaused] = useState(false)
   const [isProcessing, setIsProcessing] = useState(true)
@@ -103,6 +104,28 @@ const RoundRobin = ({ totalProcesses, processingDone, quantum }) => {
           if (isPaused === false) {
             setIsPaused(true)
             logPartialProgress()
+          }
+          break
+        case 's':
+          if (isPaused === false && blockedProcesses.length > 0) {
+            const processToSuspend = blockedProcesses.shift()
+            processToSuspend.timeToUnblock = 0
+            memory.dealloc(processToSuspend)
+            suspendedProcesses.push(processToSuspend)
+            operationWasPerformed = true
+          }
+          break
+        case 'r':
+          if (isPaused === false && suspendedProcesses.length > 0) {
+            const processToAlloc = suspendedProcesses.shift()
+            const wasAllocated = memory.alloc(processToAlloc)
+
+            if (wasAllocated) {
+              readyProcesses.push(processToAlloc)
+              operationWasPerformed = true
+            } else {
+              suspendedProcesses.unshift(processToAlloc)
+            }
           }
           break
         default:
@@ -191,6 +214,19 @@ const RoundRobin = ({ totalProcesses, processingDone, quantum }) => {
         </table>
       </Window>
     )
+  }
+
+  const renderSuspendedProcessesPeek = () => {
+    if (suspendedProcesses.length > 0) {
+      const process = suspendedProcesses[0]
+      return (
+        <Window title='suspended - Process simulation' icon={<ReaderCd2 variant='32x32_4' />}>
+          <Fieldset legend={`PID ${process.id}`} style={{ width: '90%', textAlign: 'left', marginBottom: 10 }}>
+            <p>Size: {process.size}MB - Required memory pages: {Math.ceil(process.size / 5)}</p>
+          </Fieldset>
+        </Window>
+      )
+    }
   }
 
   useEffect(() => {
@@ -356,6 +392,7 @@ const RoundRobin = ({ totalProcesses, processingDone, quantum }) => {
       <Container>
         <div style={{ textAlign: 'center' }}>
           <h1>New processes: {newProcesses.length}</h1>
+          <h1>Suspended processes: {suspendedProcesses.length}</h1>
           <h2>Quantum: {quantum}</h2>
           {
             !isProcessing && simulationEnd !== null
@@ -406,6 +443,7 @@ const RoundRobin = ({ totalProcesses, processingDone, quantum }) => {
               : (<></>)
           }
         </Window>
+        {renderSuspendedProcessesPeek()}
         <Window title='terminated - Process Simulation' icon={<Qfecheck111 variant='32x32_4' />}>
           {
             Array.isArray(terminatedProcesses)
