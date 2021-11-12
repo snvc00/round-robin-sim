@@ -112,6 +112,20 @@ const RoundRobin = ({ totalProcesses, processingDone, quantum }) => {
             processToSuspend.timeToUnblock = 0
             memory.dealloc(processToSuspend)
             suspendedProcesses.push(processToSuspend)
+
+            // A process was deallocated, so check if there a chance to allocate a new one
+            if (newProcesses.length > 0) {
+              const nextProccess = newProcesses.shift()
+              const wasAllocated = memory.alloc(nextProccess)
+
+              if (wasAllocated) {
+                nextProccess.arrivalTime = globalTime
+                readyProcesses.push(nextProccess)
+              } else {
+                newProcesses.unshift(nextProccess)
+              }
+            }
+
             operationWasPerformed = true
           }
           break
