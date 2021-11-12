@@ -19,5 +19,11 @@ export const INTERRUPTIONS = {
   },
   t: {
     description: 'Memory visualization'
+  },
+  s: {
+    description: 'Suspend process'
+  },
+  r: {
+    description: 'Allocate suspended process'
   }
 }
