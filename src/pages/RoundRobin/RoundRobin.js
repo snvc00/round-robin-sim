@@ -304,7 +304,7 @@ const RoundRobin = ({ totalProcesses, processingDone, quantum }) => {
     setLastUpdate(now)
 
     // Check if process end
-    if (newProcesses.length === 0 && readyProcesses.length === 0 && blockedProcesses.length === 0 && processInExecution === null) {
+    if (newProcesses.length === 0 && readyProcesses.length === 0 && blockedProcesses.length === 0 && processInExecution === null && suspendedProcesses.length === 0) {
       setIsProcessing(false)
       if (simulationEnd === null) {
         setSimulationEnd(globalTime)
@@ -359,7 +359,7 @@ const RoundRobin = ({ totalProcesses, processingDone, quantum }) => {
             setProcessInExecution(nextReadyProc)
           } else {
             // If there are no blocked processes, end processing
-            if (blockedProcesses.length === 0) {
+            if (blockedProcesses.length === 0 && suspendedProcesses.length === 0) {
               setIsProcessing(false)
               if (simulationEnd === null) {
                 setSimulationEnd(globalTime)
